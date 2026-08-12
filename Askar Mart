@@ -1,0 +1,392 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iomanip>
+#include <algorithm>
+
+using namespace std;
+
+struct Product {
+    int id;
+    string name;
+    string category;
+    double price;
+    double oldPrice;
+};
+
+struct CartItem {
+    Product product;
+    int quantity;
+};
+
+vector<Product> products = {
+    {1, "Premium Smartphone 5G 128GB", "Electronics", 19999, 24999},
+    {2, "Wireless Bluetooth Headphones", "Electronics", 1299, 1999},
+    {3, "Premium Cotton Men's T-Shirt", "Fashion", 599, 999},
+    {4, "Men's Premium Running Shoes", "Shoes", 1499, 2199},
+    {5, "Smart Watch with Fitness Tracking", "Electronics", 2499, 3299},
+    {6, "Automatic Coffee Maker Machine", "Home", 3499, 4199}
+};
+
+vector<CartItem> cart;
+
+/* DISPLAY PRODUCTS */
+void displayProducts() {
+    cout << "\n=============================================\n";
+    cout << "              ASKHAR MART PRODUCTS\n";
+    cout << "=============================================\n";
+
+    for (const auto &p : products) {
+        cout << "\nID       : " << p.id;
+        cout << "\nProduct  : " << p.name;
+        cout << "\nCategory : " << p.category;
+        cout << "\nPrice    : Rs." << fixed << setprecision(2) << p.price;
+        cout << "\nOld Price: Rs." << p.oldPrice;
+        cout << "\n---------------------------------------------\n";
+    }
+}
+
+/* SEARCH PRODUCT */
+void searchProduct() {
+
+    string keyword;
+
+    cout << "\nEnter product name to search: ";
+    cin.ignore();
+    getline(cin, keyword);
+
+    transform(keyword.begin(), keyword.end(),
+              keyword.begin(), ::tolower);
+
+    bool found = false;
+
+    for (const auto &p : products) {
+
+        string name = p.name;
+
+        transform(name.begin(), name.end(),
+                  name.begin(), ::tolower);
+
+        if (name.find(keyword) != string::npos) {
+
+            cout << "\nProduct Found!";
+            cout << "\nID       : " << p.id;
+            cout << "\nName     : " << p.name;
+            cout << "\nCategory : " << p.category;
+            cout << "\nPrice    : Rs." << p.price;
+            cout << "\n";
+
+            found = true;
+        }
+    }
+
+    if (!found)
+        cout << "\nProduct not found!\n";
+}
+
+/* FILTER CATEGORY */
+void filterCategory() {
+
+    int choice;
+
+    cout << "\n========== CATEGORY ==========\n";
+    cout << "1. Electronics\n";
+    cout << "2. Fashion\n";
+    cout << "3. Shoes\n";
+    cout << "4. Home\n";
+    cout << "Enter choice: ";
+    cin >> choice;
+
+    string category;
+
+    switch (choice) {
+        case 1:
+            category = "Electronics";
+            break;
+
+        case 2:
+            category = "Fashion";
+            break;
+
+        case 3:
+            category = "Shoes";
+            break;
+
+        case 4:
+            category = "Home";
+            break;
+
+        default:
+            cout << "Invalid category!\n";
+            return;
+    }
+
+    cout << "\nProducts in " << category << ":\n";
+
+    for (const auto &p : products) {
+
+        if (p.category == category) {
+
+            cout << "\nID    : " << p.id;
+            cout << "\nName  : " << p.name;
+            cout << "\nPrice : Rs." << p.price;
+            cout << "\n";
+        }
+    }
+}
+
+/* ADD TO CART */
+void addToCart() {
+
+    int id;
+
+    displayProducts();
+
+    cout << "\nEnter Product ID: ";
+    cin >> id;
+
+    bool found = false;
+
+    for (auto &item : cart) {
+
+        if (item.product.id == id) {
+
+            item.quantity++;
+
+            cout << "\nProduct quantity increased!\n";
+
+            found = true;
+            return;
+        }
+    }
+
+    for (const auto &p : products) {
+
+        if (p.id == id) {
+
+            cart.push_back({p, 1});
+
+            cout << "\n" << p.name
+                 << " added to cart!\n";
+
+            found = true;
+            break;
+        }
+    }
+
+    if (!found)
+        cout << "\nInvalid Product ID!\n";
+}
+
+/* DISPLAY CART */
+void displayCart() {
+
+    if (cart.empty()) {
+
+        cout << "\nYour cart is empty!\n";
+        return;
+    }
+
+    double total = 0;
+
+    cout << "\n=============================================\n";
+    cout << "                SHOPPING CART\n";
+    cout << "=============================================\n";
+
+    for (const auto &item : cart) {
+
+        double amount =
+            item.product.price * item.quantity;
+
+        cout << "\nProduct : "
+             << item.product.name;
+
+        cout << "\nPrice   : Rs."
+             << item.product.price;
+
+        cout << "\nQuantity: "
+             << item.quantity;
+
+        cout << "\nAmount  : Rs."
+             << amount;
+
+        cout << "\n---------------------------------------------";
+
+        total += amount;
+    }
+
+    cout << "\n\nTOTAL: Rs."
+         << fixed << setprecision(2)
+         << total << "\n";
+}
+
+/* REMOVE FROM CART */
+void removeFromCart() {
+
+    if (cart.empty()) {
+
+        cout << "\nCart is empty!\n";
+        return;
+    }
+
+    int id;
+
+    displayCart();
+
+    cout << "\nEnter Product ID to remove: ";
+    cin >> id;
+
+    for (auto it = cart.begin();
+         it != cart.end();
+         ++it) {
+
+        if (it->product.id == id) {
+
+            cart.erase(it);
+
+            cout << "\nProduct removed from cart!\n";
+
+            return;
+        }
+    }
+
+    cout << "\nProduct not found in cart!\n";
+}
+
+/* BUY NOW */
+void buyNow() {
+
+    int id;
+
+    displayProducts();
+
+    cout << "\nEnter Product ID to Buy: ";
+    cin >> id;
+
+    for (const auto &p : products) {
+
+        if (p.id == id) {
+
+            cout << "\n====================================\n";
+            cout << "           ORDER DETAILS\n";
+            cout << "====================================\n";
+
+            cout << "Product : "
+                 << p.name << "\n";
+
+            cout << "Price   : Rs."
+                 << p.price << "\n";
+
+            cout << "\nOrder placed successfully!\n";
+
+            return;
+        }
+    }
+
+    cout << "\nInvalid Product ID!\n";
+}
+
+/* CHECKOUT */
+void checkout() {
+
+    if (cart.empty()) {
+
+        cout << "\nYour cart is empty!\n";
+        return;
+    }
+
+    double total = 0;
+
+    for (const auto &item : cart) {
+
+        total +=
+            item.product.price *
+            item.quantity;
+    }
+
+    cout << "\n====================================\n";
+    cout << "             CHECKOUT\n";
+    cout << "====================================\n";
+
+    cout << "Total Amount: Rs."
+         << fixed << setprecision(2)
+         << total << "\n";
+
+    cout << "\nOrder placed successfully! 🎉\n";
+    cout << "Thank you for shopping with Askar Mart!\n";
+
+    cart.clear();
+}
+
+/* MAIN */
+int main() {
+
+    int choice;
+
+    cout << "\n=============================================\n";
+    cout << "          WELCOME TO ASKAR MART\n";
+    cout << "       Everything you need in one place\n";
+    cout << "=============================================\n";
+
+    do {
+
+        cout << "\n\n========== ASKAR MART MENU ==========\n";
+        cout << "1. View Products\n";
+        cout << "2. Search Product\n";
+        cout << "3. Shop By Category\n";
+        cout << "4. Add Product to Cart\n";
+        cout << "5. View Cart\n";
+        cout << "6. Remove Product from Cart\n";
+        cout << "7. Buy Now\n";
+        cout << "8. Checkout\n";
+        cout << "9. Exit\n";
+
+        cout << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+
+            case 1:
+                displayProducts();
+                break;
+
+            case 2:
+                searchProduct();
+                break;
+
+            case 3:
+                filterCategory();
+                break;
+
+            case 4:
+                addToCart();
+                break;
+
+            case 5:
+                displayCart();
+                break;
+
+            case 6:
+                removeFromCart();
+                break;
+
+            case 7:
+                buyNow();
+                break;
+
+            case 8:
+                checkout();
+                break;
+
+            case 9:
+                cout << "\nThank you for visiting Askar Mart!\n";
+                break;
+
+            default:
+                cout << "\nInvalid choice! Try again.\n";
+        }
+
+    } while (choice != 9);
+
+    return 0;
+}
